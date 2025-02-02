@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/gdamore/tcell/v2"
-	"github.com/rivo/tview"
+    "github.com/gdamore/tcell/v2"
+    "github.com/rivo/tview"
 )
 
 func main() {
@@ -11,7 +11,7 @@ func main() {
     grid := tview.NewGrid()
 
     app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-        if event.Rune() == 'q' {
+        if event.Key() == tcell.KeyEsc {
             modal := tview.NewModal().
                 SetText("Do you want to quit the application?").
                 AddButtons([]string{"Quit", "Cancel"}).
@@ -28,22 +28,51 @@ func main() {
         return event
     })
 
-    grid.SetColumns(-1, -1, -1)
-    grid.SetRows(-1, -2, -1)
-
-    body := tview.NewTextView()
-    body.SetBorder(true).SetTitle("Body")
-
+    title := tview.NewTextView()
+    list := tview.NewList()
     input := tview.NewInputField()
-    input.SetLabel("Enter a new task ")
-    input.SetDoneFunc(func(key tcell.Key) { 
-        body.SetText(input.GetText())
+
+    title.SetText("tdui - To Do interactive application")
+    title.SetTextAlign(tview.AlignCenter)
+    title.SetBorder(true)
+
+    list.SetSelectedFocusOnly(true)
+    list.SetBorder(true)
+    list.ShowSecondaryText(false)
+    list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+        if event.Key() == tcell.KeyTab {
+            app.SetFocus(input)
+            return nil
+        }
+        return event
+    })
+
+    input.SetLabel("Enter a new task: ")
+    input.SetDoneFunc(func(key tcell.Key) {
+        if input.GetText() == "" {
+            return
+        }
+        list.AddItem(input.GetText(), "", '-', func() {
+            tmp := list.GetCurrentItem()
+            list.RemoveItem(tmp)
+        })
         input.SetText("")
     })
-    input.SetTitle("To Do").SetBorder(true)
+    input.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+        if event.Key() == tcell.KeyTab {
+            app.SetFocus(list)
+            return nil
+        }
+        return event
+    })
+    input.SetBorder(true)
 
-    grid.AddItem(input, 3, 0, 1, 3, 0, 0, false)
-    grid.AddItem(body, 0, 0, 3, 3, 0, 0, false)
+    grid.SetColumns(-1, -1, -1)
+    grid.SetRows(-1, -6, -1)
+
+    grid.AddItem(title, 0, 0, 1, 3, 0, 0, false)
+    grid.AddItem(list, 1, 0, 2, 3, 0, 0, false)
+    grid.AddItem(input, 3, 0, 1, 3, 0, 0, true)
 
     err := app.SetRoot(grid, true).EnableMouse(true).Run()
 
