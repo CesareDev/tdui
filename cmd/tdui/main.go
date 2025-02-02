@@ -1,24 +1,49 @@
 package main
 
-import(
-    "github.com/rivo/tview"
+import (
+	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
 )
 
 func main() {
 
     app := tview.NewApplication()
-
     grid := tview.NewGrid()
-    grid.SetColumns(-1)
+
+    app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+        if event.Rune() == 'q' {
+            modal := tview.NewModal().
+                SetText("Do you want to quit the application?").
+                AddButtons([]string{"Quit", "Cancel"}).
+                SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+                    if buttonLabel == "Quit" {
+                        app.Stop()
+                    }
+                    if buttonLabel == "Cancel" {
+                        app.SetRoot(grid, true)
+                    }
+                })
+            app.SetRoot(modal, true)
+        }
+        return event
+    })
+
+    grid.SetColumns(-1, -1, -1)
     grid.SetRows(-1, -2, -1)
 
-    head := tview.NewTextView().SetTitle("Head").SetBorder(true)
-    body := tview.NewTextView().SetTitle("Body").SetBorder(true)
-    footer := tview.NewTextView().SetTitle("Footer").SetBorder(true)
+    body := tview.NewTextView()
+    body.SetBorder(true).SetTitle("Body")
 
-    grid.AddItem(head, 0, 0, 1, 1, 0, 0, false)
-    grid.AddItem(body, 1, 0, 2, 1, 0, 0, false)
-    grid.AddItem(footer, 3, 0, 1, 1, 0, 0, false)
+    input := tview.NewInputField()
+    input.SetLabel("Enter a new task ")
+    input.SetDoneFunc(func(key tcell.Key) { 
+        body.SetText(input.GetText())
+        input.SetText("")
+    })
+    input.SetTitle("To Do").SetBorder(true)
+
+    grid.AddItem(input, 3, 0, 1, 3, 0, 0, false)
+    grid.AddItem(body, 0, 0, 3, 3, 0, 0, false)
 
     err := app.SetRoot(grid, true).EnableMouse(true).Run()
 
