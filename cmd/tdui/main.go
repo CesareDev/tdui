@@ -8,7 +8,7 @@ import (
 func main() {
 
     app := tview.NewApplication()
-    grid := tview.NewGrid()
+    flex := tview.NewFlex().SetDirection(tview.FlexRow)
 
     app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
         if event.Key() == tcell.KeyEsc {
@@ -20,7 +20,7 @@ func main() {
                         app.Stop()
                     }
                     if buttonLabel == "Cancel" {
-                        app.SetRoot(grid, true)
+                        app.SetRoot(flex, true)
                     }
                 })
             app.SetRoot(modal, true)
@@ -67,14 +67,11 @@ func main() {
     })
     input.SetBorder(true)
 
-    grid.SetColumns(-1, -1, -1)
-    grid.SetRows(-1, -6, -1)
+    flex.AddItem(title, 0, 1, false)
+    flex.AddItem(list, 0, 6, false)
+    flex.AddItem(input, 0, 1, true)
 
-    grid.AddItem(title, 0, 0, 1, 3, 0, 0, false)
-    grid.AddItem(list, 1, 0, 2, 3, 0, 0, false)
-    grid.AddItem(input, 3, 0, 1, 3, 0, 0, true)
-
-    err := app.SetRoot(grid, true).EnableMouse(true).Run()
+    err := app.SetRoot(flex, true).EnableMouse(true).Run()
 
     if err != nil {
         panic(err)
