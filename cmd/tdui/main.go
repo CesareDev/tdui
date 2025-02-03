@@ -1,8 +1,10 @@
 package main
 
 import (
-    "github.com/gdamore/tcell/v2"
-    "github.com/rivo/tview"
+	"strconv"
+
+	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
 )
 
 func main() {
@@ -28,48 +30,73 @@ func main() {
         return event
     })
 
-    title := tview.NewTextView()
     list := tview.NewList()
-    input := tview.NewInputField()
-
-    title.SetText("tdui - To Do interactive application")
-    title.SetTextAlign(tview.AlignCenter)
-    title.SetBorder(true)
+    inputFlex := tview.NewFlex()
+    input := tview.NewForm()
 
     list.SetSelectedFocusOnly(true)
     list.SetBorder(true)
     list.ShowSecondaryText(false)
     list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-        if event.Key() == tcell.KeyTab {
+        if event.Key() == tcell.KeyCtrlL {
             app.SetFocus(input)
+            list.SetTitle(" Press Ctrl+L to focus the list ")
+            inputFlex.SetTitle(" Use Tab to navigate bewteen the inputs ")
             return nil
         }
         return event
     })
+    list.SetTitle(" Press Tab to focus the list ")
 
-    input.SetLabel("Enter a new task: ")
-    input.SetDoneFunc(func(key tcell.Key) {
-        if input.GetText() == "" {
+    days := []string{}
+    for i := 1; i <= 31; i++ {
+        days = append(days, strconv.Itoa(i))
+    }
+
+    months := []string{}
+    for i := 1; i <= 12; i++ {
+        months = append(months, strconv.Itoa(i))
+    }
+
+    var stringTask string
+    var stringDay string
+    var stringMonth string
+
+    input.AddInputField("Enter a new task: ", "", 0, nil, func(text string) {
+        stringTask = text
+    })
+    input.AddDropDown("Day: ", days, 0, func(option string, optionIndex int) {
+        stringDay = option 
+    })
+    input.AddDropDown("Month: ", months, 0, func(option string, optionIndex int) {
+        stringMonth = option
+    })
+    input.AddButton("Insert", func() {
+        if stringTask == "" {
             return
         }
-        list.AddItem(input.GetText(), "", '-', func() {
+        list.AddItem(stringTask + " [@ " + stringDay + "/" + stringMonth + "]", "", '-', func() {
             tmp := list.GetCurrentItem()
             list.RemoveItem(tmp)
         })
-        input.SetText("")
     })
     input.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-        if event.Key() == tcell.KeyTab {
+        if event.Key() == tcell.KeyCtrlL {
             app.SetFocus(list)
+            inputFlex.SetTitle(" Press Ctrl+L to focus the input ")
+            list.SetTitle(" Press Enter to delete a task ")
             return nil
         }
         return event
     })
-    input.SetBorder(true)
 
-    flex.AddItem(title, 0, 1, false)
-    flex.AddItem(list, 0, 6, false)
-    flex.AddItem(input, 0, 1, true)
+    inputFlex.SetDirection(tview.FlexRow)
+    inputFlex.AddItem(input, 0, 2, true)
+    inputFlex.SetBorder(true)
+    inputFlex.SetTitle(" Use Tab to navigate bewteen the inputs ")
+
+    flex.AddItem(list, 0, 5, false)
+    flex.AddItem(inputFlex, 0, 2, true)
 
     err := app.SetRoot(flex, true).EnableMouse(true).Run()
 
