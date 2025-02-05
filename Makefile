@@ -1,14 +1,12 @@
-SRC_DIR = ./cmd/tdui
-SRC = main.go
-
+SRC_DIR = ./cmd
 BIN_DIR = ./bin
-BIN = tdui 
+BIN = tdui
 
-all: $(BIN_DIR)/$(BIN) 
+all: build 
 
-$(BIN_DIR)/$(BIN): $(SRC_DIR)/$(SRC)
+build:
 	mkdir -p $(BIN_DIR)
-	go build -o $(BIN_DIR)/$(BIN) $(SRC_DIR)/$(SRC)
+	go build -o $(BIN_DIR) $(SRC_DIR)/...
 
 run:
 	$(BIN_DIR)/$(BIN)
