@@ -16,14 +16,9 @@ To run the application you can either use `make run` or go to the `bin` director
 
 ## Usage
 
-Write the task on the input form and press `Enter` to add it to the list. You can navigate switch between the input field and the list using the `Tab` key.
+The first version of the application is not yed completed. If you wanna do some test you can navigate through the input components with the `Tab` key and remove a task with `Enter`. To swtich between the list and the input form you can use `Ctrl+L`. To exit just press `Esc` and then the `Quit` button.
 
-When you are on the item list section you can navigate through the tasks usign the arrow keys and you can remove one task pressing the`Enter` key.
-
-## ToDo
-
-- [ ] Save the tasks on disk
-- [ ] Enhance the color and style
+You can also use the mouse to navigate and focus all the components.
 
 ## Mentions
 
